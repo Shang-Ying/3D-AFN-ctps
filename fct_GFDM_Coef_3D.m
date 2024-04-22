@@ -1,0 +1,73 @@
+function [Wcoef,idx] = fct_GFDM_Coef_3D(order,x,y,z,ns)
+n = length(x);
+xyz = [x,y,z]; 
+[idx,d] = knnsearch(xyz,xyz,'k',ns+1);
+% n_pas = pascal(order+1);
+% n_coe = n_pas(3,end) - 1;
+Wcoef = zeros(9,ns+1,n);
+
+for i = 1:n
+    tpx = (x(idx(i,2:ns+1))-x(i))';
+    tpy = (y(idx(i,2:ns+1))-y(i))';
+    tpz = (z(idx(i,2:ns+1))-z(i))';
+    dd = d(i,2:ns+1)/d(i,ns+1);
+    W_func = 1-6*(dd.^2)+8*(dd.^3)-3*(dd.^4);
+    W2 = diag(W_func.^2);
+
+        if order == 2
+            P = [tpx; tpy; tpz; (tpx.^2)/2; tpx.*tpy; tpx.*tpz; (tpy.^2)/2; tpy.*tpz; (tpz.^2)/2];
+        % Unprocessed
+        % elseif order == 3
+        %     P = [tpx; tpy; (tpx.^2)/2; tpx.*tpy; (tpy.^2)/2; (tpx.^3)/6; (3.*tpx.^2.*tpy.^1)/6; (3.*tpx.^1.*tpy.^2)/6; (tpy.^3)/6];
+        % elseif order == 4
+        %     P = [tpx; tpy; (tpx.^2)/2; tpx.*tpy; (tpy.^2)/2; (tpx.^3)/6; (3.*tpx.^2.*tpy.^1)/6; (3.*tpx.^1.*tpy.^2)/6; (tpy.^3)/6;...
+        %         (tpx.^4)/24; (4.*tpx.^3.*tpy.^1)/24; (6.*tpx.^2.*tpy.^2)/24; (4.*tpx.^1.*tpy.^3)/24; (tpy.^4)/24];
+        % elseif order == 5
+        %     P = [tpx; tpy; (tpx.^2)/2; tpx.*tpy; (tpy.^2)/2; (tpx.^3)/6; (3.*tpx.^2.*tpy.^1)/6; (3.*tpx.^1.*tpy.^2)/6; (tpy.^3)/6;...
+        %         (tpx.^4)/24; (4.*tpx.^3.*tpy.^1)/24; (6.*tpx.^2.*tpy.^2)/24; (4.*tpx.^1.*tpy.^3)/24; (tpy.^4)/24;...
+        %         (tpx.^5)/120; (5.*tpx.^4.*tpy.^1)/120; (10.*tpx.^3.*tpy.^2)/120; (10.*tpx.^2.*tpy.^3)/120; (5.*tpx.^1.*tpy.^4)/120; (tpy.^5)/120];
+        % elseif order == 6
+        %     P = [tpx; tpy; (tpx.^2)/2; tpx.*tpy; (tpy.^2)/2; (tpx.^3)/6; (3.*tpx.^2.*tpy.^1)/6; (3.*tpx.^1.*tpy.^2)/6; (tpy.^3)/6;...
+        %         (tpx.^4)/24; (4.*tpx.^3.*tpy.^1)/24; (6.*tpx.^2.*tpy.^2)/24; (4.*tpx.^1.*tpy.^3)/24; (tpy.^4)/24;...
+        %         (tpx.^5)/120; (5.*tpx.^4.*tpy.^1)/120; (10.*tpx.^3.*tpy.^2)/120; (10.*tpx.^2.*tpy.^3)/120; (5.*tpx.^1.*tpy.^4)/120; (tpy.^5)/120;...
+        %         (tpx.^6)/720; (6.*tpx.^5.*tpy.^1)/720; (15.*tpx.^4.*tpy.^2)/720; (20.*tpx.^3.*tpy.^3)/720;...
+        %         (15.*tpx.^2.*tpy.^4)/720; (6.*tpx.^1.*tpy.^5)/720; (tpy.^6)/720];
+        % elseif order == 7
+        %     P = [tpx; tpy; (tpx.^2)/2; tpx.*tpy; (tpy.^2)/2; (tpx.^3)/6; (3.*tpx.^2.*tpy.^1)/6; (3.*tpx.^1.*tpy.^2)/6; (tpy.^3)/6;...
+        %         (tpx.^4)/24; (4.*tpx.^3.*tpy.^1)/24; (6.*tpx.^2.*tpy.^2)/24; (4.*tpx.^1.*tpy.^3)/24; (tpy.^4)/24;...
+        %         (tpx.^5)/120; (5.*tpx.^4.*tpy.^1)/120; (10.*tpx.^3.*tpy.^2)/120; (10.*tpx.^2.*tpy.^3)/120; (5.*tpx.^1.*tpy.^4)/120; (tpy.^5)/120;...
+        %         (tpx.^6)/720; (6.*tpx.^5.*tpy.^1)/720; (15.*tpx.^4.*tpy.^2)/720; (20.*tpx.^3.*tpy.^3)/720;...
+        %         (15.*tpx.^2.*tpy.^4)/720; (6.*tpx.^1.*tpy.^5)/720; (tpy.^6)/720;...
+        %         (tpx.^7)/5040; (7.*tpx.^6.*tpy.^1)/5040; (21.*tpx.^5.*tpy.^2)/5040; (35.*tpx.^4.*tpy.^3)/5040;...
+        %         (35.*tpx.^3.*tpy.^4)/5040; (21.*tpx.^2.*tpy.^5)/5040; (7.*tpx.^1.*tpy.^6)/5040; (tpy.^7)/5040];
+        % elseif order == 8
+        %     P = [tpx; tpy; (tpx.^2)/2; tpx.*tpy; (tpy.^2)/2; (tpx.^3)/6; (3.*tpx.^2.*tpy.^1)/6; (3.*tpx.^1.*tpy.^2)/6; (tpy.^3)/6;...
+        %         (tpx.^4)/24; (4.*tpx.^3.*tpy.^1)/24; (6.*tpx.^2.*tpy.^2)/24; (4.*tpx.^1.*tpy.^3)/24; (tpy.^4)/24;...
+        %         (tpx.^5)/120; (5.*tpx.^4.*tpy.^1)/120; (10.*tpx.^3.*tpy.^2)/120; (10.*tpx.^2.*tpy.^3)/120; (5.*tpx.^1.*tpy.^4)/120; (tpy.^5)/120;...
+        %         (tpx.^6)/720; (6.*tpx.^5.*tpy.^1)/720; (15.*tpx.^4.*tpy.^2)/720; (20.*tpx.^3.*tpy.^3)/720;...
+        %         (15.*tpx.^2.*tpy.^4)/720; (6.*tpx.^1.*tpy.^5)/720; (tpy.^6)/720;...
+        %         (tpx.^7)/5040; (7.*tpx.^6.*tpy.^1)/5040; (21.*tpx.^5.*tpy.^2)/5040; (35.*tpx.^4.*tpy.^3)/5040;...
+        %         (35.*tpx.^3.*tpy.^4)/5040; (21.*tpx.^2.*tpy.^5)/5040; (7.*tpx.^1.*tpy.^6)/5040; (tpy.^7)/5040;...
+        %         (tpx.^8)/40320; (8.*tpx.^7.*tpy.^1)/40320; (28.*tpx.^6.*tpy.^2)/40320; (56.*tpx.^5.*tpy.^3)/40320;...
+        %         (70.*tpx.^4.*tpy.^4)/40320; (56.*tpx.^3.*tpy.^5)/40320; (28.*tpx.^2.*tpy.^6)/40320;...
+        %         (8.*tpx.^1.*tpy.^7)/40320; (tpy.^8)/40320];
+        else
+        end
+    Wcoef_tp = (P*W2*(P)')\([-sum(P*W2,2),P*W2]);   %inv(P*W2*(P)')*([-sum(P*W2,2),P*W2]);
+    
+%     A = (P*W2*(P)');
+%     b = ([-sum(P*W2,2),P*W2]);
+%     [U,S,V] = svd(A);
+%     s = diag(S);   % vector of singular values
+%     tolerance = max(size(A))*eps(max(s));
+%     p = sum(s>tolerance);
+%     Up = U(:,1:p);
+%     Vp = V(:,1:p);
+%     SpInv = spdiags( 1.0./s(1:p), 0, p, p);
+%     AInv = Vp * SpInv * Up';
+%     Wcoef_tp = AInv * b;
+
+%     Wcoef_tp = pinv(P*W2*(P)')*([-sum(P*W2,2),P*W2]);
+    
+    Wcoef(:,:,i) = Wcoef_tp;
+end
